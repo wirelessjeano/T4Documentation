@@ -168,5 +168,9 @@ Settings are contained in the "T4Documentation.tt.settings.xml" file. See for co
 
 This is free software, licensed under: [The MIT License (MIT)](https://opensource.org/licenses/MIT)
 
+# Buy Me a Beer
+
+If you find this project useful, you can [buy Jean-Michel Gaud a beer](mailto:wirelessjeano@gmail.com).
+
 
 
