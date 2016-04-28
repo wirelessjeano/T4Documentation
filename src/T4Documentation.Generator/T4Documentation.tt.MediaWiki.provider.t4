@@ -1,0 +1,97 @@
+﻿<#+
+/*
+
+This file contains hooks and extra code used by T4MVC.tt. The main goal is to avoid the need for users
+to fork the 'official' template in order to achieve what they want.
+ 
+*/
+void RenderHeaderOne(string input) {
+	WriteLine(string.Format("={0}=", input));
+}
+
+void RenderHeaderTwo(string input) {
+	WriteLine(string.Format("=={0}==", input));
+}
+
+void RenderHeaderThree(string input) {
+	WriteLine(string.Format("==={0}===", input));
+}
+
+void RenderHeaderFour(string input) {
+	WriteLine(string.Format("===={0}====", input));
+}
+
+
+void RenderParagraph(string input) {
+	WriteLine(string.Format("{0}<br>", input));
+}
+
+void RenderCode(string input) {
+	WriteLine(string.Format("<pre>{0}</pre>", input));
+}
+
+void RenderAnchor(string hrefInput, string labelInput) {
+	WriteLine(string.Format("[[{0}|{1}]]", hrefInput, labelInput));
+}
+
+void RenderBulletListItem(string input) {
+	WriteLine(string.Format("*{0}", input));
+}
+
+void RenderPropertiesTable(List<PropertyInfo> input) {
+	RenderHeaderFour("Properties");
+	WriteLine("{| class=\"wikitable\"");
+	WriteLine("!colspan=\"5\"|Properties");
+	WriteLine("|-");
+	WriteLine("!|Access");
+	WriteLine("!|Type");
+	WriteLine("!|Name");
+	WriteLine("!|Description");
+	WriteLine("!|Code");
+	WriteLine("|-");
+	foreach (var propertyInfo in input.OrderBy(x => x.Name)) {
+		WriteLine("|-");
+		WriteLine(string.Format("|{0}",propertyInfo.Access));
+		WriteLine(string.Format("|{0}",propertyInfo.Type));
+		WriteLine(string.Format("|{0}",propertyInfo.Name));
+		WriteLine(string.Format("|{0}{1}{2}",propertyInfo.Summary, propertyInfo.Remarks, propertyInfo.Example));
+		if(!string.IsNullOrEmpty(propertyInfo.ExampleCode)) {
+			WriteLine(string.Format("|<pre>{0}</pre>",propertyInfo.ExampleCode));
+		} else {
+			WriteLine("|");
+		}
+	}
+	WriteLine("|}");
+}
+
+void RenderMethodsTable(List<MethodInfo> input) {
+	RenderHeaderFour("Methods");
+	WriteLine("{| class=\"wikitable\"");
+	WriteLine("!colspan=\"4\"|Methods");
+	WriteLine("|-");
+	WriteLine("!|Access");
+	WriteLine("!|Signature");
+	WriteLine("!|Description");
+	WriteLine("!|Code");
+	WriteLine("|-");
+	foreach (var methodInfo in input.OrderBy(x => x.Name)) {
+		StringBuilder sbParameters = new StringBuilder();
+		for(int i = 0; i < methodInfo.ParameterInfos.Count(); i++){
+			sbParameters.Append(methodInfo.ParameterInfos[i].Type);
+			if ((i + 1 != methodInfo.ParameterInfos.Count())){
+				sbParameters.Append(", ");
+			}
+		}
+		WriteLine("|-");
+		WriteLine(string.Format("|{0}",methodInfo.Access));
+		WriteLine(string.Format("|''Name:'' {0}({1})<br />''ReturnType: ''{2}",methodInfo.Name,sbParameters.ToString() ,methodInfo.ReturnType));
+		WriteLine(string.Format("|{0}{1}{2}",methodInfo.Summary, methodInfo.Remarks, methodInfo.Example));
+		if(!string.IsNullOrEmpty(methodInfo.ExampleCode)) {
+			WriteLine(string.Format("|<pre>{0}</pre>",methodInfo.ExampleCode));
+		} else {
+			WriteLine("|");
+		}
+	}
+	WriteLine("|}");
+}
+#>

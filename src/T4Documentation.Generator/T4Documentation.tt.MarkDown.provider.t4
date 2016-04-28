@@ -1,0 +1,97 @@
+﻿<#+
+/*
+
+This file contains hooks and extra code used by T4MVC.tt. The main goal is to avoid the need for users
+to fork the 'official' template in order to achieve what they want.
+ 
+*/
+void RenderHeaderOne(string input) {
+	WriteLine(string.Format("# {0}", input));
+}
+
+void RenderHeaderTwo(string input) {
+	WriteLine(string.Format("## {0}", input));
+}
+
+void RenderHeaderThree(string input) {
+	WriteLine(string.Format("### {0}", input));
+}
+
+void RenderHeaderFour(string input) {
+	WriteLine(string.Format("#### {0}", input));
+}
+
+
+void RenderParagraph(string input) {
+	WriteLine(string.Format("{0}", input));
+	WriteLine("");
+}
+
+void RenderCode(string input) {
+	WriteLine("~~~~");
+	WriteLine(input);
+	WriteLine("~~~~");
+	WriteLine("");
+}
+
+void RenderAnchor(string hrefInput, string labelInput) {
+	WriteLine(string.Format("[{1}]({0})", hrefInput, labelInput));
+}
+
+void RenderBulletListItem(string input) {
+	WriteLine(string.Format("- {0}", input));
+}
+
+void RenderPropertiesTable(List<PropertyInfo> input) {
+	
+
+	WriteLine("| Access | Signature | Description |");
+	WriteLine("| --- | --- | --- | --- | --- |");
+	foreach (var propertyInfo in input.OrderBy(x => x.Name)) {
+		WriteLine(string.Format("| {0} | {1} {2} | {3} | ",propertyInfo.Access, propertyInfo.Type,propertyInfo.Name, string.Format("{0}{1}{2}",propertyInfo.Summary, propertyInfo.Remarks, propertyInfo.Example)));
+	}
+	WriteLine("");
+
+	var examplePropertyInfos = input.Where(x => !string.IsNullOrEmpty(x.ExampleCode.Trim())).OrderBy(x => x.Name);
+
+	
+	if(examplePropertyInfos != null && examplePropertyInfos.Any())
+	{
+		RenderHeaderFour("Property Example(s)");
+		foreach (var propertyInfo in examplePropertyInfos) {
+			RenderCode(propertyInfo.ExampleCode);
+		}
+	}
+}
+
+void RenderMethodsTable(List<MethodInfo> input) {
+
+	RenderHeaderFour("Methods");
+	WriteLine("| Access | Signature | Description |");
+	WriteLine("| --- | --- | --- | --- |");
+	foreach (var methodInfo in input.OrderBy(x => x.Name)) {
+		StringBuilder sbParameters = new StringBuilder();
+		for(int i = 0; i < methodInfo.ParameterInfos.Count(); i++){
+			sbParameters.Append(methodInfo.ParameterInfos[i].Type);
+			if ((i + 1 != methodInfo.ParameterInfos.Count())){
+				sbParameters.Append(", ");
+			}
+		}
+		var signature = string.Format("{2} {0}({1})",methodInfo.Name,sbParameters.ToString() ,methodInfo.ReturnType);
+		var description = string.Format("{0}{1}{2}",methodInfo.Summary, methodInfo.Remarks, methodInfo.Example);
+		WriteLine(string.Format("| {0} | {1} | {2} |",methodInfo.Access, signature, description));
+	}
+	WriteLine("");
+
+	var exampleMethodInfos = input.Where(x => !string.IsNullOrEmpty(x.ExampleCode.Trim())).OrderBy(x => x.Name);
+
+	
+	if(exampleMethodInfos != null && exampleMethodInfos.Any())
+	{
+		RenderHeaderFour("Method Example(s)");
+		foreach (var methodInfo in exampleMethodInfos) {
+			RenderCode(methodInfo.ExampleCode);
+		}
+	}
+}
+#>

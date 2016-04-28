@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T4Documentation.Generator", "T4Documentation.Generator\T4Documentation.Generator.csproj", "{3AAD6757-2882-4013-BDB1-C79820329888}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AAD6757-2882-4013-BDB1-C79820329888}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AAD6757-2882-4013-BDB1-C79820329888}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AAD6757-2882-4013-BDB1-C79820329888}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AAD6757-2882-4013-BDB1-C79820329888}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

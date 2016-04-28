@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<DocumentSettings>
+  <WikiLinkPrefix>24-com/MVC Site Framework/</WikiLinkPrefix>
+  <RootFoldersToDocument>
+    <Folder name="Logic" description="" />
+  </RootFoldersToDocument>
+  <SplitIntoMultipleFiles>False</SplitIntoMultipleFiles>
+  <IncludeUsingStatements>True</IncludeUsingStatements>
+</DocumentSettings>

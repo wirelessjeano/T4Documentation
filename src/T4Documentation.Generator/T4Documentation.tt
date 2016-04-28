@@ -1,0 +1,1031 @@
+﻿<#
+/*
+
+*/
+#>
+<#@ template language="C#" debug="true" hostspecific="true" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="$(TargetDir)T4Documentation.Generator.dll" #>
+<#@ assembly name="Microsoft.VisualStudio.Shell.Interop" #>
+<#@ assembly name="Microsoft.VisualBasic" #>
+<#@ assembly name="EnvDTE" #>
+<#@ assembly name="EnvDTE80" #>
+<#@ assembly name="VSLangProj" #>
+<#@ assembly name="System.Xml" #>
+<#@ assembly name="System.Xml.Linq" #>
+<#@ import namespace="System.Xml" #>
+<#@ import namespace="T4Documentation.Generator.Domain" #>
+<#@ import namespace="T4Documentation.Generator.Logic" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.IO" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Text.RegularExpressions" #>
+<#@ import namespace="Microsoft.VisualStudio.Shell.Interop" #>
+<#@ import namespace="EnvDTE" #>
+<#@ import namespace="EnvDTE80" #>
+<#@ import namespace="Microsoft.VisualStudio.TextTemplating" #>
+<#@ output extension=".txt" #>
+<# // To debug, uncomment the next two lines !! 
+  //System.Diagnostics.Debugger.Launch();
+  //System.Diagnostics.Debugger.Break();
+#>
+<#settings=DocumentSettings.Load(Host);#>
+<#PrepareDataToRender(this); #>
+<#var manager = Manager.Create(Host, GenerationEnvironment); #>
+<#
+/*
+Documentation home links start
+*/
+#>
+<# if(settings.SplitIntoMultipleFiles) {#>
+<#foreach (var folderItem in settings.RootFoldersToDocument) {
+string folder = folderItem.Key; string folderDescription = folderItem.Value;#>
+<# RenderHeaderOne(folder); #>
+<# if(!string.IsNullOrEmpty(folderDescription)) { #>
+<# RenderParagraph(folderDescription); #>
+<#}#>
+<# RenderAnchor(settings.WikiLinkPrefix + folder, "See full" + folder.ToLower() + "reference."); #>
+<#}#>
+<#}#>
+<#
+/*
+Documentation home links end
+*/
+#>
+<#
+/*
+Root Folder iteration start*/
+#>
+<#foreach (var folderItem in settings.RootFoldersToDocument.Where(x => ProjectItemInfos.Any(y => y.Folder == x.Key))) {
+string folder = folderItem.Key; string folderDescription = folderItem.Value; #>
+<#manager.StartNewFile(folder + ".txt"); #>
+<# RenderHeaderOne(folder); #>
+<# if(!string.IsNullOrEmpty(folderDescription)) { #>
+<# RenderParagraph(folderDescription); #>
+<#}#>
+<#foreach (string infoItemType in ProjectItemInfos.Where(x => x.Folder == folder).OrderBy(x => x.Type).Select(x => x.TypePlural).ToArray().Distinct()) {#>
+<# RenderHeaderTwo(infoItemType); #>
+<#foreach (ProjectItemInfo infoItem in ProjectItemInfos.Where(x => x.TypePlural == infoItemType && x.Folder == folder)) { #>
+<# RenderHeaderThree(infoItem.Name + " " + infoItem.Type); #>
+<# if(!string.IsNullOrEmpty(infoItem.Namespace)) { #>
+<# RenderParagraph("Namespace: " + infoItem.Namespace); #>
+<#}#>
+<# if(!string.IsNullOrEmpty(infoItem.Summary)) { #>
+<# RenderParagraph("Summary: " + infoItem.Summary); #>
+<#}#>
+<# if(infoItem.UsingStatements != null && infoItem.UsingStatements.Any() && settings.IncludeUsingStatements) { #>
+<#foreach (var usingStatement in infoItem.UsingStatements.Where(x=> !string.IsNullOrEmpty(x.Namespace))) { #>
+<# RenderBulletListItem("Using: " + usingStatement.Namespace); #>
+<# WriteLine(""); #>
+<#}#>
+<#}#>
+<#
+/*
+Properties start
+*/
+#>
+<# if(infoItem.PropertyInfos != null && infoItem.PropertyInfos.Any()) { #>
+<# RenderPropertiesTable(infoItem.PropertyInfos); #>
+<#}#>
+<#
+/*
+Properties end
+*/
+#>
+<#
+/*
+Methods start
+*/
+#>
+<# if(infoItem.MethodInfos != null && infoItem.MethodInfos.Any()) { #>
+<# RenderMethodsTable(infoItem.MethodInfos); #>
+<#}#>
+<#
+/*
+Methods end
+*/
+#>
+<# if(!string.IsNullOrEmpty(infoItem.Remarks)) { #>
+<# RenderHeaderFour("Remarks"); #>
+<# RenderParagraph(infoItem.Remarks); #>
+<#}#>
+<# if(!string.IsNullOrEmpty(infoItem.Example)) { #>
+<# RenderHeaderFour("Example"); #>
+<# RenderParagraph(infoItem.Example); #>
+<#}#>
+<# if(!string.IsNullOrEmpty(infoItem.ExampleCode)) { #>
+<# RenderHeaderFour("Example Code"); #>
+<# RenderCode(infoItem.ExampleCode); #>
+<#}#>
+<#}#>
+<#}#>
+<#manager.EndBlock(); #>
+<#}#>
+<#
+/*
+Root Folder iteration End
+*/
+#>
+<#settings.SaveChanges(manager); #>
+<#manager.Process(settings.SplitIntoMultipleFiles); #>
+
+<#@ Include File="T4Documentation.tt.MarkDown.provider.t4" #>
+
+
+<#+ 
+static DocumentSettings settings;
+const string ControllerSuffix = "Controller";
+
+static DTE Dte;
+static Project Project;
+static string AppRoot;
+
+static TextTransformation TT;
+static string T4FileName;
+static string T4Folder;
+
+static HashSet<ProjectItemInfo> ProjectItemInfos;
+
+void PrepareDataToRender(TextTransformation tt)
+{
+	
+    TT = tt;
+    T4FileName = Path.GetFileName(Host.TemplateFile);
+    T4Folder = Path.GetDirectoryName(Host.TemplateFile);
+    ProjectItemInfos = new HashSet<ProjectItemInfo>();
+
+    // Get the DTE service from the host
+    var serviceProvider = Host as IServiceProvider;
+    if (serviceProvider != null)
+    {
+        Dte = (EnvDTE.DTE)serviceProvider.GetService(typeof(EnvDTE.DTE));
+    }
+
+    // Fail if we couldn't get the DTE. This can happen when trying to run in TextTransform.exe
+    if (Dte == null)
+    {
+        throw new Exception("T4MVC can only execute through the Visual Studio host");
+    }
+
+    Project = GetProjectContainingT4File(Dte);
+
+    if (Project == null)
+    {
+        Error("Could not find the VS Project containing the T4 file.");
+        return;
+    }
+
+    // Get the path of the root folder of the app
+    AppRoot = Path.GetDirectoryName(Project.FullName) + '\\';
+
+    // Process controllers and views from project root
+    ProcessProjectRoot(Project);
+
+}
+
+//keep
+Project GetProjectContainingT4File(DTE dte)
+{
+
+    // Find the .tt file's ProjectItem
+    ProjectItem projectItem = dte.Solution.FindProjectItem(Host.TemplateFile);
+
+    // If the .tt file is not opened, open it
+    if (projectItem.Document == null)
+        projectItem.Open(EnvDTE.Constants.vsViewKindCode);
+
+    return projectItem.ContainingProject;
+}
+
+void ProcessProjectRoot(Project project)
+{
+	
+	if(settings.RootFoldersToDocument != null && settings.RootFoldersToDocument.Any())
+	{
+		foreach (string folder in settings.RootFoldersToDocument.Select(x=>x.Key)) {
+			// Get the folder
+			ProjectItem folderToProcess = Functions.GetProjectItem(project, folder);
+
+			// Process areas folder
+			if (folderToProcess != null)
+			{
+				RecursivelyProcessPrjectItems(folderToProcess.ProjectItems, folder);
+			}
+		
+		}
+	}
+    else
+	{
+		
+		ProcessRootProjectItems(project);
+	}
+}
+
+void ProcessRootProjectItems(Project project)
+{
+	List<KeyValuePair<string, string>> folderItems = new List<KeyValuePair<string, string>>();
+
+    foreach (EnvDTE.ProjectItem item in project.ProjectItems)
+    {	
+		if(Functions.IsFolder(item))
+		{	
+			
+			folderItems.Add(new KeyValuePair<string, string>(item.Name,""));
+				
+
+		}
+      
+    }
+
+	settings.RootFoldersToDocument = new XmlNameValueCollection(folderItems, "Folder");
+	ProcessProjectRoot(project);
+	
+}
+
+void RecursivelyProcessPrjectItems(ProjectItems items, string folder)
+{
+	foreach (ProjectItem item in items)
+	{
+		if(!Functions.IsFolder(item))
+		{
+			if (item.FileCodeModel != null)
+			{
+				FileCodeModel2 codeModel2 = item.FileCodeModel as FileCodeModel2;
+
+				List<UsingStatement> usingStatements = new List<UsingStatement>();
+
+				//these are global using statements for the file
+				foreach (var type in codeModel2.CodeElements.OfType<CodeImport>())
+				{
+					var usingStatement = new UsingStatement{
+						Namespace = type.Namespace
+					};
+
+					usingStatements.Add(usingStatement);
+				}
+
+			
+
+				// Process all the elements that are namespaces
+				foreach (var ns in codeModel2.CodeElements.OfType<CodeNamespace>())
+				{
+					List<UsingStatement> nameSpaceUsingStatements = new List<UsingStatement>();
+
+					nameSpaceUsingStatements.AddRange(usingStatements);
+
+					//this should be processed first
+					foreach (var type in ns.Members.OfType<CodeImport>())
+					{
+						
+
+						if(nameSpaceUsingStatements.Count(x => x.Namespace == type.Namespace) == 0)
+						{
+							var namespaceUsingStatement = new UsingStatement{
+								Namespace = type.Namespace
+							};
+
+							nameSpaceUsingStatements.Add(namespaceUsingStatement);
+						}
+						
+					}
+
+
+					foreach (var type in ns.Members.OfType<CodeClass2>())
+					{
+						ProcessType(type, folder,nameSpaceUsingStatements);
+					}
+
+					
+					foreach (var type in ns.Members.OfType<CodeInterface>())
+					{
+						ProcessType(type, folder,nameSpaceUsingStatements);
+					}
+
+					foreach (var type in ns.Members.OfType<CodeStruct2>())
+					{
+						ProcessType(type, folder,nameSpaceUsingStatements);
+					}
+
+					
+				}
+
+			}
+			else
+			{
+				//Still not sure what to do with non-FileCodeModel files
+				//public string Name { get; set; }
+				//public string Type { get; set; }
+				//public string Namespace { get; set;}
+				//public string Description { get; set; }
+				//public string Folder { get; set; }
+				//there is no code model
+
+				//ProjectItemInfo projectItemInfoItem = new ProjectItemInfo{
+				//	Name = item.Name,
+				//	Folder = folder
+				//};
+
+				//ProjectItemInfos.Add(projectItemInfoItem);
+			}
+		}
+		else
+		{
+			RecursivelyProcessPrjectItems(item.ProjectItems,folder);
+		}
+
+	}
+}
+
+void ProcessType(CodeStruct2 type, string folder, List<UsingStatement> usingStatements)
+{
+	IEnumerable<CodeFunction2> methods = Functions.GetMethods(type);
+	List<MethodInfo> methodInfos = Functions.GetMethodInfo(methods);
+
+	IEnumerable<CodeProperty2> properties = Functions.GetProperties(type);
+	List<PropertyInfo> propertyInfos = Functions.GetPropertyInfo(properties);
+
+	ProjectItemInfo projectItemInfoItem = new ProjectItemInfo{
+		Name = type.Name,
+		Folder = folder,
+		Namespace = type.Namespace != null ? type.Namespace.Name : String.Empty,
+		UsingStatements = usingStatements,
+		PropertyInfos = propertyInfos,
+		MethodInfos = methodInfos
+	};
+
+	if(!string.IsNullOrEmpty(type.DocComment))
+	{
+		projectItemInfoItem.Summary = Functions.GetTagContent("summary", type.DocComment);
+		projectItemInfoItem.Remarks = Functions.GetTagContent("remarks", type.DocComment);
+		projectItemInfoItem.Example = Functions.GetTagContent("example", type.DocComment);
+		projectItemInfoItem.ExampleCode = Functions.GetTagContent("code",  type.DocComment);
+	}
+	
+	Functions.SetProjectItemInfoType(projectItemInfoItem,type);
+
+	ProjectItemInfos.Add(projectItemInfoItem);
+}
+
+void ProcessType(CodeInterface type, string folder, List<UsingStatement> usingStatements)
+{
+	IEnumerable<CodeFunction2> methods = Functions.GetMethods(type);
+	List<MethodInfo> methodInfos = Functions.GetMethodInfo(methods);
+
+	IEnumerable<CodeProperty2> properties = Functions.GetProperties(type);
+	List<PropertyInfo> propertyInfos = Functions.GetPropertyInfo(properties);
+
+	ProjectItemInfo projectItemInfoItem = new ProjectItemInfo{
+		Name = type.Name,
+		Folder = folder,
+		Namespace = type.Namespace != null ? type.Namespace.Name : String.Empty,
+		UsingStatements = usingStatements,
+		PropertyInfos = propertyInfos,
+		MethodInfos = methodInfos
+	};
+
+	if(!string.IsNullOrEmpty(type.DocComment))
+	{
+		projectItemInfoItem.Summary = Functions.GetTagContent("summary", type.DocComment);
+		projectItemInfoItem.Remarks = Functions.GetTagContent("remarks", type.DocComment);
+		projectItemInfoItem.Example = Functions.GetTagContent("example", type.DocComment);
+		projectItemInfoItem.ExampleCode = Functions.GetTagContent("code",  type.DocComment);
+	}
+	
+	Functions.SetProjectItemInfoType(projectItemInfoItem,type);
+
+	ProjectItemInfos.Add(projectItemInfoItem);
+}
+
+//we are processing our classes here
+void ProcessType(CodeClass2 type, string folder, List<UsingStatement> usingStatements)
+{
+	
+	IEnumerable<CodeFunction2> methods = Functions.GetMethods(type);
+	List<MethodInfo> methodInfos = Functions.GetMethodInfo(methods);
+	
+	
+	IEnumerable<CodeProperty2> properties = Functions.GetProperties(type);
+	List<PropertyInfo> propertyInfos = Functions.GetPropertyInfo(properties);
+
+
+	ProjectItemInfo projectItemInfoItem = new ProjectItemInfo{
+		Name = type.Name,
+		Folder = folder,
+		Namespace = type.Namespace != null ? type.Namespace.Name : String.Empty,
+		UsingStatements = usingStatements,
+		PropertyInfos = propertyInfos,
+		MethodInfos = methodInfos
+	};
+
+	if(!string.IsNullOrEmpty(type.DocComment))
+	{
+		projectItemInfoItem.Summary = Functions.GetTagContent("summary", type.DocComment);
+		projectItemInfoItem.Remarks = Functions.GetTagContent("remarks", type.DocComment);
+		projectItemInfoItem.Example = Functions.GetTagContent("example", type.DocComment);
+		projectItemInfoItem.ExampleCode = Functions.GetTagContent("code",  type.DocComment);
+	}
+
+	Functions.SetProjectItemInfoType(projectItemInfoItem,type);
+
+	ProjectItemInfos.Add(projectItemInfoItem);
+}
+
+
+  /// Custom class to allow string arrays to be read and written to/from settings
+    public class XmlStringArray : XmlSettingsBase, IEnumerable<string>
+    {
+        public XmlStringArray(IEnumerable<string> items, string name)
+        {
+            this._items = items;
+            this._name = name;
+            SetSaveAsChild(this, true);
+        }
+
+        string _name;
+        IEnumerable<string> _items;
+
+        protected override void Load(System.Xml.Linq.XElement xml)
+        {
+            var items = new List<string>();
+            foreach (var item in xml.Elements(this._name))
+            {
+                items.Add(item.Value);
+            }
+            this._items = items;
+            SetNeedsSave(this, false);
+        }
+
+        protected override void Save(System.Xml.XmlWriter writer)
+        {
+            if (this._items == null || !this._items.Any())
+            {
+                WriteCommentedProperty(writer, this._name);
+                return;
+            }
+
+            foreach (var item in this._items)
+            {
+                writer.WriteElementString(this._name, item);
+            }
+        }
+
+        public IEnumerator<string> GetEnumerator()
+        {
+            return this._items.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
+ public class XmlNameValueCollection : XmlSettingsBase, IEnumerable<KeyValuePair<string, string>>
+    {
+        public XmlNameValueCollection(IEnumerable<KeyValuePair<string, string>> items, string name)
+        {
+            this._items = items;
+            this._name = name;
+            SetSaveAsChild(this, true);
+        }
+
+        string _name;
+        IEnumerable<KeyValuePair<string, string>> _items;
+
+        protected override void Load(System.Xml.Linq.XElement xml)
+        {
+            var items = new List<KeyValuePair<string, string>>();
+            foreach (var item in xml.Elements(this._name))
+            {
+                items.Add(new KeyValuePair<string, string>(item.Attribute("name").Value, item.Attribute("description").Value));
+            }
+            this._items = items;
+            SetNeedsSave(this, false);
+        }
+
+        protected override void Save(System.Xml.XmlWriter writer)
+        {
+            if (this._items == null || !this._items.Any())
+            {
+                WriteCommentedProperty(writer, this._name);
+                return;
+            }
+
+            foreach (var item in this._items)
+            {
+                writer.WriteElementString(this._name, item.ToString());
+            }
+        }
+
+        public IEnumerator<KeyValuePair<string, string>> GetEnumerator()
+        {
+            return this._items.GetEnumerator();
+        }
+
+        System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+        {
+            return this.GetEnumerator();
+        }
+    }
+
+
+    /// Base XmlSettings class, responsible for reading/writing the settigns file contents, all settings other 
+    /// than string convertable types should decend from this class
+    public abstract class XmlSettingsBase
+    {
+        protected XmlSettingsBase()
+        {
+            this.NeedsSave = true;
+        }
+
+        protected virtual void Init()
+        {
+        }
+
+        protected bool SaveAsChild { get; private set; }
+
+        protected bool NeedsSave { get; private set; }
+
+        protected static void SetSaveAsChild(XmlSettingsBase settings, bool value)
+        {
+            settings.SaveAsChild = value;
+        }
+
+        protected static void SetNeedsSave(XmlSettingsBase settings, bool value)
+        {
+            settings.NeedsSave = value;
+        }
+
+        protected static void WriteCommentedProperty(System.Xml.XmlWriter writer, string name)
+        {
+            writer.WriteComment(string.Concat("<", name, "></", name, ">"));
+        }
+
+        protected static void WritePropertyDesc(System.Xml.XmlWriter writer, System.ComponentModel.PropertyDescriptor property)
+        {
+            var desc = property.Attributes.OfType<System.ComponentModel.DescriptionAttribute>().FirstOrDefault();
+            if (desc != null)
+            {
+                writer.WriteComment(desc.Description);
+            }
+        }
+
+        protected virtual void Load(System.Xml.Linq.XElement xml)
+        {
+            this.NeedsSave = false;
+            int matched = 0;
+            int read = 0;
+            foreach (System.ComponentModel.PropertyDescriptor property in System.ComponentModel.TypeDescriptor.GetProperties(this))
+            {
+                object pvalue;
+                if (typeof(XmlSettingsBase).IsAssignableFrom(property.PropertyType) || (((pvalue = property.GetValue(this)) != null) && typeof(XmlSettingsBase).IsAssignableFrom(pvalue.GetType())))
+                {
+                    read++;
+                    var value = xml.Element(property.Name);
+                    if (value != null)
+                    {
+                        var settings = (XmlSettingsBase)property.GetValue(this);
+                        settings.Load(value);
+                        if (!settings.NeedsSave)
+                            matched++;
+                        settings.SaveAsChild = true;
+                    }
+                }
+                else if (!property.IsReadOnly)
+                {
+                    read++;
+                    var value = xml.Element(property.Name);
+                    if (value != null)
+                    {
+                        if (property.Converter.CanConvertFrom(typeof(string)))
+                        {
+                            matched++;
+                            property.SetValue(this, property.Converter.ConvertFromString(value.Value));
+                        }
+                        else
+                        {
+                            System.Reflection.MethodBase parser = property.PropertyType.GetMethod("Parse", new Type[] { typeof(string) });
+                            if (parser == null)
+                                parser = property.PropertyType.GetConstructor(new Type[] { typeof(string) });
+
+                            if (parser != null)
+                            {
+                                matched++;
+                                property.SetValue(this, parser.Invoke(null, new Object[] { value.Value }));
+                            }
+                        }
+                    }
+                }
+            }
+            this.NeedsSave = this.NeedsSave || (matched < read);
+        }
+
+        protected virtual void Save(System.Xml.XmlWriter writer)
+        {
+            foreach (System.ComponentModel.PropertyDescriptor property in System.ComponentModel.TypeDescriptor.GetProperties(this))
+            {
+                var value = property.GetValue(this);
+                WritePropertyDesc(writer, property);
+                if (value != null)
+                {
+                    if (typeof(XmlSettingsBase).IsAssignableFrom(value.GetType()))
+                    {
+                        var settings = (XmlSettingsBase)property.GetValue(this);
+                        if ((settings != null) && settings.SaveAsChild)
+                        {
+                            writer.WriteStartElement(property.Name);
+                            settings.Save(writer);
+                            writer.WriteEndElement();
+                        }
+                    }
+                    else if (!property.IsReadOnly)
+                    {
+                        writer.WriteElementString(property.Name, property.Converter.ConvertToString(value));
+                    }
+                }
+                else
+                {
+                    WriteCommentedProperty(writer, property.Name);
+                }
+            }
+        }
+    }
+
+public class DocumentSettings : XmlSettings
+    {
+        public static DocumentSettings Load(ITextTemplatingEngineHost host)
+        {
+            return Load<DocumentSettings>(host);
+        }
+
+        public DocumentSettings()
+        {
+            this.RootFoldersToDocument = new XmlNameValueCollection(new List<KeyValuePair<string, string>> (), "Folder");
+
+            this.SplitIntoMultipleFiles = true;
+
+            this.IncludeUsingStatements = true;
+        }
+
+        [System.ComponentModel.Description("These are the root folders taht we will document")]
+        public XmlNameValueCollection RootFoldersToDocument { get; set; }
+
+        [System.ComponentModel.Description("If true,the template output will be split into multiple files.")]
+        public bool SplitIntoMultipleFiles { get; set; }
+
+        [System.ComponentModel.Description("If true, includes using statements.")]
+        public bool IncludeUsingStatements { get; set; }
+
+        [System.ComponentModel.Description("Prefixes WIKI links.")]
+        public string WikiLinkPrefix { get; set; } = "";
+
+    }
+
+    /// This is the base class for the standard settings, the main settings class should inherit from this
+    /// one since it provides the methods to interact with the T4 system and EnvDTE. Sub-properties can
+    /// just inherit from XmlSettingsBase.
+    public abstract class XmlSettings : XmlSettingsBase
+    {
+        protected static T Load<T>(ITextTemplatingEngineHost host) where T : XmlSettings, new()
+        {
+            T settings = new T();
+            settings.Init(host);
+            return settings;
+        }
+
+        void Init(ITextTemplatingEngineHost host)
+        {
+           
+            this.TemplateFile = Path.GetFileName(host.TemplateFile);
+            this.TemplateFolder = Path.GetDirectoryName(host.TemplateFile);
+           
+            // Get the DTE service from the host
+            var serviceProvider = host as IServiceProvider;
+            if (serviceProvider != null)
+            {
+                this.DTE = (EnvDTE.DTE)serviceProvider.GetService(typeof(EnvDTE.DTE));
+            }
+
+            // Fail if we couldn't get the DTE. This can happen when trying to run in TextTransform.exe
+            if (this.DTE == null)
+            {
+                throw new Exception("T4Build can only execute through the Visual Studio host");
+            }
+
+
+
+            this.ProjectItem = this.DTE.Solution.FindProjectItem(host.TemplateFile);
+
+            // If the .tt file is not opened, open it
+            if (this.ProjectItem.Document == null)
+                this.ProjectItem.Open(EnvDTE.Constants.vsViewKindCode);
+
+            this.Project = this.ProjectItem.ContainingProject;
+
+            if (Project == null)
+            {
+                throw new Exception("Could not find the VS Project containing the T4 file.");
+            }
+
+            this.Load();
+            this.Init();
+        }
+
+        public string TemplateFile { get; private set; }
+
+        public string TemplateFolder { get; private set; }
+
+        public DTE DTE { get; private set; }
+
+        public ProjectItem ProjectItem { get; private set; }
+
+        public Project Project { get; private set; }
+
+        ProjectItem FindProjectItemRecursive(ProjectItems items, string name)
+        {
+            if (items == null)
+                return null;
+
+            foreach (ProjectItem item in items)
+            {
+                if (item.Name.Equals(name) || item.Name.StartsWith(name + "."))
+                    return item;
+                var found = FindProjectItemRecursive(item.ProjectItems, name);
+                if (found != null)
+                    return found;
+            }
+
+            return null;
+        }
+
+        protected ProjectItem FindProjectItem(string name)
+        {
+            return this.FindProjectItemRecursive(this.Project.ProjectItems, name);
+        }
+
+        protected string SettingsFile
+        {
+            get
+            {
+                return Path.Combine(this.TemplateFolder, string.Concat(this.TemplateFile, ".settings.xml"));
+            }
+        }
+
+        void Load()
+        {
+            if (System.IO.File.Exists(this.SettingsFile))
+                try
+                {
+                    this.Load(System.Xml.Linq.XElement.Load(this.SettingsFile));
+                }
+                catch { throw; }
+        }
+
+        public void SaveChanges(Manager manager)
+        {
+            // Avoid saving if we dont need to;
+            if (!this.NeedsSave)
+                return;
+
+            if (manager.FileOkToWrite(this.SettingsFile))
+            {
+                var settings = new System.Xml.XmlWriterSettings
+                {
+                    Indent = true
+                };
+                using (var writer = System.Xml.XmlWriter.Create(this.SettingsFile, settings))
+                {
+                    writer.WriteStartDocument();
+                    writer.WriteStartElement(this.GetType().Name);
+                    this.Save(writer);
+                    writer.WriteEndElement();
+                    writer.WriteEndDocument();
+                }
+
+                var item = this.ProjectItem.Collection.AddFromFile(this.SettingsFile);
+                item.Properties.Item("ItemType").Value = "None";
+            }
+            else
+            {
+                TT.Error("Cannot save settings file! " + this.SettingsFile);
+            }
+                
+        }
+    }
+
+	public class Manager
+    {
+        private class Block
+        {
+            public String Name;
+            public int Start, Length;
+        }
+
+        private Block currentBlock;
+        private List<Block> files = new List<Block>();
+        private Block footer = new Block();
+        private Block header = new Block();
+        private ITextTemplatingEngineHost host;
+        private StringBuilder template;
+        protected List<String> generatedFileNames = new List<String>();
+
+        public static Manager Create(ITextTemplatingEngineHost host, StringBuilder template)
+        {
+            return (host is IServiceProvider) ? new VSManager(host, template) : new Manager(host, template);
+        }
+
+        public virtual bool FileOkToWrite(String fileName)
+        {
+            return true;
+        }
+
+        public void KeepGeneratedFile(String name)
+        {
+            name = Path.Combine(Path.GetDirectoryName(host.TemplateFile), name);
+            generatedFileNames.Add(name);
+        }
+
+        public void StartNewFile(String name)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            CurrentBlock = new Block { Name = name };
+        }
+
+        public void StartFooter()
+        {
+            CurrentBlock = footer;
+        }
+
+        public void StartHeader()
+        {
+            CurrentBlock = header;
+        }
+
+        public void EndBlock()
+        {
+            if (CurrentBlock == null)
+                return;
+            CurrentBlock.Length = template.Length - CurrentBlock.Start;
+            if (CurrentBlock != header && CurrentBlock != footer)
+                files.Add(CurrentBlock);
+            currentBlock = null;
+        }
+
+        public virtual void Process(bool split)
+        {
+            if (split)
+            {
+                EndBlock();
+                String headerText = template.ToString(header.Start, header.Length);
+                String footerText = template.ToString(footer.Start, footer.Length);
+                String outputPath = Path.GetDirectoryName(host.TemplateFile);
+                files.Reverse();
+                foreach (Block block in files)
+                {
+                    String fileName = Path.Combine(outputPath, block.Name);
+                    String content = headerText + template.ToString(block.Start, block.Length) + footerText;
+                    generatedFileNames.Add(fileName);
+                    CreateFile(fileName, content);
+                    template.Remove(block.Start, block.Length);
+                }
+            }
+        }
+
+        protected virtual void CreateFile(String fileName, String content)
+        {
+            if (IsFileContentDifferent(fileName, content))
+                File.WriteAllText(fileName, content);
+        }
+
+        public virtual String GetCustomToolNamespace(String fileName)
+        {
+            return null;
+        }
+
+        public virtual String DefaultProjectNamespace
+        {
+            get { return null; }
+        }
+
+        protected bool IsFileContentDifferent(String fileName, String newContent)
+        {
+            return !(File.Exists(fileName) && File.ReadAllText(fileName) == newContent);
+        }
+
+        private Manager(ITextTemplatingEngineHost host, StringBuilder template)
+        {
+            this.host = host;
+            this.template = template;
+        }
+
+        private Block CurrentBlock
+        {
+            get { return currentBlock; }
+            set
+            {
+                if (CurrentBlock != null)
+                    EndBlock();
+                if (value != null)
+                    value.Start = template.Length;
+                currentBlock = value;
+            }
+        }
+
+        private class VSManager : Manager
+        {
+            private EnvDTE.ProjectItem templateProjectItem;
+            private EnvDTE.DTE dte;
+            private Action<String> checkOutAction;
+            private Action<IEnumerable<String>> projectSyncAction;
+            private IVsQueryEditQuerySave2 queryEditSave;
+
+            public override String DefaultProjectNamespace
+            {
+                get
+                {
+                    return templateProjectItem.ContainingProject.Properties.Item("DefaultNamespace").Value.ToString();
+                }
+            }
+
+            public override String GetCustomToolNamespace(string fileName)
+            {
+                return dte.Solution.FindProjectItem(fileName).Properties.Item("CustomToolNamespace").Value.ToString();
+            }
+
+            public override void Process(bool split)
+            {
+                if (templateProjectItem.ProjectItems == null)
+                    return;
+                base.Process(split);
+                projectSyncAction.EndInvoke(projectSyncAction.BeginInvoke(generatedFileNames, null, null));
+            }
+
+            public override bool FileOkToWrite(String fileName)
+            {
+                CheckoutFileIfRequired(fileName);
+                return base.FileOkToWrite(fileName);
+            }
+
+            protected override void CreateFile(String fileName, String content)
+            {
+                if (IsFileContentDifferent(fileName, content))
+                {
+                    CheckoutFileIfRequired(fileName);
+                    File.WriteAllText(fileName, content);
+                }
+            }
+
+            internal VSManager(ITextTemplatingEngineHost host, StringBuilder template)
+                : base(host, template)
+            {
+                var hostServiceProvider = (IServiceProvider)host;
+                if (hostServiceProvider == null)
+                    throw new ArgumentNullException("Could not obtain IServiceProvider");
+                dte = (EnvDTE.DTE)hostServiceProvider.GetService(typeof(EnvDTE.DTE));
+                if (dte == null)
+                    throw new ArgumentNullException("Could not obtain DTE from host");
+                templateProjectItem = dte.Solution.FindProjectItem(host.TemplateFile);
+                checkOutAction = (String fileName) => dte.SourceControl.CheckOutItem(fileName);
+                projectSyncAction = (IEnumerable<String> keepFileNames) => ProjectSync(templateProjectItem, keepFileNames);
+                queryEditSave = (IVsQueryEditQuerySave2)hostServiceProvider.GetService(typeof(SVsQueryEditQuerySave));
+            }
+
+            private static void ProjectSync(EnvDTE.ProjectItem templateProjectItem, IEnumerable<String> keepFileNames)
+            {
+                var keepFileNameSet = new HashSet<String>(keepFileNames);
+                var projectFiles = new Dictionary<String, EnvDTE.ProjectItem>();
+                var originalFilePrefix = Path.GetFileNameWithoutExtension(templateProjectItem.get_FileNames(0)) + ".";
+                foreach (EnvDTE.ProjectItem projectItem in templateProjectItem.ProjectItems)
+                    projectFiles.Add(projectItem.get_FileNames(0), projectItem);
+
+                // Remove unused items from the project
+                foreach (var pair in projectFiles)
+                    if (!keepFileNames.Contains(pair.Key) && !(Path.GetFileNameWithoutExtension(pair.Key) + ".").StartsWith(originalFilePrefix))
+                        pair.Value.Delete();
+
+                // Add missing files to the project
+                foreach (String fileName in keepFileNameSet)
+                    if (!projectFiles.ContainsKey(fileName))
+                        templateProjectItem.ProjectItems.AddFromFile(fileName);
+            }
+
+            private void CheckoutFileIfRequired(String fileName)
+            {
+                if (queryEditSave != null)
+                {
+                    uint pfEditVerdict;
+                    queryEditSave.QuerySaveFile(fileName, 0, null, out pfEditVerdict);
+                }
+                else
+                {
+                    var sc = dte.SourceControl;
+                    if (sc != null && sc.IsItemUnderSCC(fileName) && !sc.IsItemCheckedOut(fileName))
+                        checkOutAction.EndInvoke(checkOutAction.BeginInvoke(fileName, null, null));
+                }
+            }
+        }
+    }
+
+#>
