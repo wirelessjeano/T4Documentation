@@ -124,9 +124,10 @@
     <Content Include="T4Documentation.tt.MediaWiki.provider.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <None Include="T4Documentation.tt.settings.xml">
+    <None Include="T4Documentation.Generator.nuspec" />
+    <Content Include="T4Documentation.tt.settings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
