@@ -19,5 +19,8 @@
     <file src="bin\Release\T4Documentation.tt.MarkDown.provider.t4" target="Content" />
     <file src="bin\Release\T4Documentation.tt.MediaWiki.provider.t4" target="Content" />
     <file src="bin\Release\T4Documentation.tt.settings.xml" target="Content" />
+    <files>
+      <file src="bin" exclude="bin" />
+    </files>
   </files>
 </package>

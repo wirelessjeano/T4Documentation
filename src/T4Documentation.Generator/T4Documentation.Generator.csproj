@@ -95,16 +95,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Abstract\CommentItem.cs" />
-    <Compile Include="Abstract\XmlSettings.cs" />
-    <Compile Include="Abstract\XmlSettingsBase.cs" />
-    <Compile Include="Constants\EnvDTEConstants.cs" />
-    <Compile Include="Domain\MethodInfo.cs" />
-    <Compile Include="Domain\ParameterInfo.cs" />
-    <Compile Include="Domain\ProjectItemInfo.cs" />
-    <Compile Include="Domain\PropertyInfo.cs" />
-    <Compile Include="Domain\UsingStatement.cs" />
-    <Compile Include="Logic\Functions.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
