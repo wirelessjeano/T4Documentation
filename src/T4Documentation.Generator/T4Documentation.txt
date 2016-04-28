@@ -1,74 +1,127 @@
-﻿# Logic
-## Classes
-### Functions Class
-Namespace: T4Documentation.Generator.Logic
+﻿=Logic=
+==Classes==
+===Functions Class===
+Namespace: T4Documentation.Generator.Logic<br>
+Summary: A library of ad-hoc functions for use in the document generator.<br>
+*Using: System
 
-Summary: A library of ad-hoc functions for use in the document generator.
+*Using: System.Collections.Generic
 
-- Using: System
+*Using: System.Linq
 
-- Using: System.Collections.Generic
+*Using: System.Text
 
-- Using: System.Linq
+*Using: System.Xml
 
-- Using: System.Text
+*Using: EnvDTE
 
-- Using: System.Xml
+*Using: EnvDTE80
 
-- Using: EnvDTE
+*Using: T4Documentation.Generator.Constants
 
-- Using: EnvDTE80
+*Using: T4Documentation.Generator.Domain
 
-- Using: T4Documentation.Generator.Constants
-
-- Using: T4Documentation.Generator.Domain
-
-#### Methods
-| Access | Signature | Description |
-| --- | --- | --- | --- |
-| Public static | string GetAccess(EnvDTE.vsCMAccess, bool, bool) | Returns a descriptive string of access, static and abtract status' |
-| Public static | System.Collections.Generic.List<T4Documentation.Generator.Domain.MethodInfo> GetMethodInfo(System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2>) | Converts a collection of CodeFunction2 objects to a collection of domain specific MethodInfo objects. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE80.CodeStruct2) | Return all the CodeFunction2 objects in the CodeStruct2's member collection. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE80.CodeClass2) | Return all the CodeFunction2 objects in the CodeClass2's member collection. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE.CodeInterface) | Return all the CodeFunction2 objects in the CodeInterface's member collection. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE.CodeParameter> GetParameters(EnvDTE80.CodeFunction2) | Return all the CodeParameter objects in the CodeFunction2's Parameters collection. |
-| Public static | System.Collections.Generic.List<T4Documentation.Generator.Domain.ParameterInfo> GetParamterInfo(System.Collections.Generic.IEnumerable<EnvDTE.CodeParameter>) | Converts a collection of CodeParameter objects to a collection of domain specific ParameterInfo objects. |
-| Public static | EnvDTE.ProjectItem GetProjectItem(EnvDTE.Project, string) | Returns a ProjectItem from a Project based on a name. |
-| Public static | EnvDTE.ProjectItem GetProjectItem(EnvDTE.ProjectItems, string) | Returns a ProjectItem from a Project based on a subPath. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE80.CodeClass2) | Return all the CodeProperty2 objects in the CodeClass2's member collection. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE.CodeInterface) | Return all the CodeProperty2 objects in the CodeInterface's member collection. |
-| Public static | System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE80.CodeStruct2) | Return all the CodeProperty2 objects in the CodeStruct2's member collection. |
-| Public static | System.Collections.Generic.List<T4Documentation.Generator.Domain.PropertyInfo> GetPropertyInfo(System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2>) | Converts a collection of CodeProperty2 objects to a collection of domain specific PropertyInfo objects. |
-| Public static | string GetTagContent(string, string) | Returns the value of a specific xml tag from an input string. |
-| Public static | bool IsAsyncController(EnvDTE80.CodeClass2) | Returns true if a CodeClass2 is an async controller. |
-| Public static | bool IsController(EnvDTE80.CodeClass2) | Returns true if a CodeClass2 is a controller. |
-| Public static | bool IsFolder(EnvDTE.ProjectItem) | Returns true if a ProjectItem is a folder. |
-| Public static | bool IsModel(EnvDTE80.CodeClass2) | Returns true if a CodeClass2 is a model. |
-| Public static | bool IsWebApi(EnvDTE80.CodeClass2) | Returns true if a CodeClass2 is a web API controller. |
-| Public static | void SetProjectItemInfoType(T4Documentation.Generator.Domain.ProjectItemInfo, object) | Sets the ProjectItemInfo type and typeplural value depending on the originating object type. |
-| Public static | bool TestFunctionKind(EnvDTE80.CodeFunction2, EnvDTE.vsCMFunction) | Tests a CodeFunction2's function kind. |
-
-#### Method Example(s)
-~~~~
-var methodInfo = new MethodInfo
+====Methods====
+{| class="wikitable"
+!colspan="4"|Methods
+|-
+!|Access
+!|Signature
+!|Description
+|-
+|-
+|Public static
+|string GetAccess(EnvDTE.vsCMAccess, bool, bool)
+|Returns a descriptive string of access, static and abtract status'
+|-
+|Public static
+|System.Collections.Generic.List<T4Documentation.Generator.Domain.MethodInfo> GetMethodInfo(System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2>)
+|Converts a collection of CodeFunction2 objects to a collection of domain specific MethodInfo objects.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE80.CodeStruct2)
+|Return all the CodeFunction2 objects in the CodeStruct2's member collection.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE80.CodeClass2)
+|Return all the CodeFunction2 objects in the CodeClass2's member collection.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeFunction2> GetMethods(EnvDTE.CodeInterface)
+|Return all the CodeFunction2 objects in the CodeInterface's member collection.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE.CodeParameter> GetParameters(EnvDTE80.CodeFunction2)
+|Return all the CodeParameter objects in the CodeFunction2's Parameters collection.
+|-
+|Public static
+|System.Collections.Generic.List<T4Documentation.Generator.Domain.ParameterInfo> GetParamterInfo(System.Collections.Generic.IEnumerable<EnvDTE.CodeParameter>)
+|Converts a collection of CodeParameter objects to a collection of domain specific ParameterInfo objects.
+|-
+|Public static
+|EnvDTE.ProjectItem GetProjectItem(EnvDTE.Project, string)
+|Returns a ProjectItem from a Project based on a name.
+|-
+|Public static
+|EnvDTE.ProjectItem GetProjectItem(EnvDTE.ProjectItems, string)
+|Returns a ProjectItem from a Project based on a subPath.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE80.CodeClass2)
+|Return all the CodeProperty2 objects in the CodeClass2's member collection.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE.CodeInterface)
+|Return all the CodeProperty2 objects in the CodeInterface's member collection.
+|-
+|Public static
+|System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2> GetProperties(EnvDTE80.CodeStruct2)
+|Return all the CodeProperty2 objects in the CodeStruct2's member collection.
+|-
+|Public static
+|System.Collections.Generic.List<T4Documentation.Generator.Domain.PropertyInfo> GetPropertyInfo(System.Collections.Generic.IEnumerable<EnvDTE80.CodeProperty2>)
+|Converts a collection of CodeProperty2 objects to a collection of domain specific PropertyInfo objects.
+|-
+|Public static
+|string GetTagContent(string, string)
+|Returns the value of a specific xml tag from an input string.
+|-
+|Public static
+|bool IsAsyncController(EnvDTE80.CodeClass2)
+|Returns true if a CodeClass2 is an async controller.
+|-
+|Public static
+|bool IsController(EnvDTE80.CodeClass2)
+|Returns true if a CodeClass2 is a controller.
+|-
+|Public static
+|bool IsFolder(EnvDTE.ProjectItem)
+|Returns true if a ProjectItem is a folder.
+|-
+|Public static
+|bool IsModel(EnvDTE80.CodeClass2)
+|Returns true if a CodeClass2 is a model.
+|-
+|Public static
+|bool IsWebApi(EnvDTE80.CodeClass2)
+|Returns true if a CodeClass2 is a web API controller.
+|-
+|Public static
+|void SetProjectItemInfoType(T4Documentation.Generator.Domain.ProjectItemInfo, object)
+|Sets the ProjectItemInfo type and typeplural value depending on the originating object type.
+|-
+|Public static
+|bool TestFunctionKind(EnvDTE80.CodeFunction2, EnvDTE.vsCMFunction)
+|Tests a CodeFunction2's function kind.
+|}
+====Method Example(s)====
+<pre>var methodInfo = new MethodInfo
  {
      Access = GetAccess(function.Access, function.IsShared, function.MustImplement),
      Name = function.Name,
      ReturnType = function.Type.AsString,
      ParameterInfos = parameterInfos
- };
-~~~~
-
-## Structs
-### TestStruct Struct
-Namespace: T4Documentation.Generator.Logic
-
-- Using: System
-
-| Access | Signature | Description |
-| --- | --- | --- | --- | --- |
-| Public | string Name |  | 
-
+ };</pre>
 
 
 

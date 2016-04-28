@@ -130,7 +130,7 @@ Root Folder iteration End
 <#settings.SaveChanges(manager); #>
 <#manager.Process(settings.SplitIntoMultipleFiles); #>
 
-<#@ Include File="T4Documentation.tt.MarkDown.provider.t4" #>
+<#@ Include File="T4Documentation.tt.MediaWiki.provider.t4" #>
 
 
 <#+ 

@@ -44,24 +44,27 @@ void RenderPropertiesTable(List<PropertyInfo> input) {
 	WriteLine("!colspan=\"5\"|Properties");
 	WriteLine("|-");
 	WriteLine("!|Access");
-	WriteLine("!|Type");
-	WriteLine("!|Name");
+	WriteLine("!|Signature");
 	WriteLine("!|Description");
-	WriteLine("!|Code");
 	WriteLine("|-");
 	foreach (var propertyInfo in input.OrderBy(x => x.Name)) {
 		WriteLine("|-");
 		WriteLine(string.Format("|{0}",propertyInfo.Access));
-		WriteLine(string.Format("|{0}",propertyInfo.Type));
-		WriteLine(string.Format("|{0}",propertyInfo.Name));
+		WriteLine(string.Format("|{0} {1}",propertyInfo.Type,propertyInfo.Name));
 		WriteLine(string.Format("|{0}{1}{2}",propertyInfo.Summary, propertyInfo.Remarks, propertyInfo.Example));
-		if(!string.IsNullOrEmpty(propertyInfo.ExampleCode)) {
-			WriteLine(string.Format("|<pre>{0}</pre>",propertyInfo.ExampleCode));
-		} else {
-			WriteLine("|");
-		}
 	}
 	WriteLine("|}");
+
+	var examplePropertyInfos = input.Where(x => !string.IsNullOrEmpty(x.ExampleCode.Trim())).OrderBy(x => x.Name);
+
+	
+	if(examplePropertyInfos != null && examplePropertyInfos.Any())
+	{
+		RenderHeaderFour("Property Example(s)");
+		foreach (var propertyInfo in examplePropertyInfos) {
+			RenderCode(propertyInfo.ExampleCode);
+		}
+	}
 }
 
 void RenderMethodsTable(List<MethodInfo> input) {
@@ -72,7 +75,6 @@ void RenderMethodsTable(List<MethodInfo> input) {
 	WriteLine("!|Access");
 	WriteLine("!|Signature");
 	WriteLine("!|Description");
-	WriteLine("!|Code");
 	WriteLine("|-");
 	foreach (var methodInfo in input.OrderBy(x => x.Name)) {
 		StringBuilder sbParameters = new StringBuilder();
@@ -84,14 +86,20 @@ void RenderMethodsTable(List<MethodInfo> input) {
 		}
 		WriteLine("|-");
 		WriteLine(string.Format("|{0}",methodInfo.Access));
-		WriteLine(string.Format("|''Name:'' {0}({1})<br />''ReturnType: ''{2}",methodInfo.Name,sbParameters.ToString() ,methodInfo.ReturnType));
+		WriteLine(string.Format("|{2} {0}({1})",methodInfo.Name,sbParameters.ToString() ,methodInfo.ReturnType));
 		WriteLine(string.Format("|{0}{1}{2}",methodInfo.Summary, methodInfo.Remarks, methodInfo.Example));
-		if(!string.IsNullOrEmpty(methodInfo.ExampleCode)) {
-			WriteLine(string.Format("|<pre>{0}</pre>",methodInfo.ExampleCode));
-		} else {
-			WriteLine("|");
-		}
+		
 	}
 	WriteLine("|}");
+
+	var exampleMethodInfos = input.Where(x => !string.IsNullOrEmpty(x.ExampleCode.Trim())).OrderBy(x => x.Name);
+
+	if(exampleMethodInfos != null && exampleMethodInfos.Any())
+	{
+		RenderHeaderFour("Method Example(s)");
+		foreach (var methodInfo in exampleMethodInfos) {
+			RenderCode(methodInfo.ExampleCode);
+		}
+	}
 }
 #>
