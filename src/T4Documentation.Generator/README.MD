@@ -170,7 +170,7 @@ This is free software, licensed under: [The MIT License (MIT)](https://opensourc
 
 # Buy Me a Beer
 
-If you find this project useful, you can [buy Jean-Michel Gaud a beer](mailto:wirelessjeano@gmail.com).
+If you find this project useful, you can [contact Jean-Michel Gaud](mailto:wirelessjeano@gmail.com).
 
 
 
