@@ -9,8 +9,8 @@
     <licenseUrl>https://opensource.org/licenses/MIT</licenseUrl>
     <projectUrl>https://github.com/wirelessjeano/T4Documentation/tree/master/src/T4Documentation.Generator</projectUrl>
     <requireLicenseAcceptance>true</requireLicenseAcceptance>
-    <description>$description$</description>
-    <releaseNotes>T4Documentation is a simple .NET code documentation solution based on the T4 text templating engine.</releaseNotes>
+    <description>T4Documentation is a simple .NET code documentation solution based on the T4 text templating engine.</description>
+    <releaseNotes></releaseNotes>
     <copyright>Copyright 2016</copyright>
     <tags></tags>
   </metadata>
