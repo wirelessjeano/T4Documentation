@@ -1,8 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <DocumentSettings>
-  <WikiLinkPrefix>24-com/MVC Site Framework/</WikiLinkPrefix>
+  <WikiLinkPrefix></WikiLinkPrefix>
   <RootFoldersToDocument>
-    <Folder name="Logic" description="" />
+    <!--<Folder name="Tests" description="This is a test class." />-->
   </RootFoldersToDocument>
   <SplitIntoMultipleFiles>False</SplitIntoMultipleFiles>
   <IncludeUsingStatements>True</IncludeUsingStatements>

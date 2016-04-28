@@ -41,6 +41,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\TestClass.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="T4Documentation.tt">
@@ -59,6 +60,7 @@
     <Content Include="T4Documentation.tt.MediaWiki.provider.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <None Include="install.ps1" />
     <None Include="T4Documentation.Generator.nuspec" />
     <Content Include="T4Documentation.tt.settings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

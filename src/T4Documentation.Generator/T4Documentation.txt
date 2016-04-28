@@ -1,3 +1,18 @@
-﻿
+﻿=Tests=
+This is a test class.<br>
+==Classes==
+===TestClass Class===
+Namespace: T4Documentation.Generator.Tests<br>
+*Using: System
+
+*Using: System.Collections.Generic
+
+*Using: System.Linq
+
+*Using: System.Text
+
+*Using: System.Threading.Tasks
+
+
 
 
