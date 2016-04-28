@@ -28,9 +28,9 @@ void RenderParagraph(string input) {
 }
 
 void RenderCode(string input) {
-	WriteLine("~~~~");
+	WriteLine("~~~");
 	WriteLine(input);
-	WriteLine("~~~~");
+	WriteLine("~~~");
 	WriteLine("");
 }
 
@@ -45,10 +45,10 @@ void RenderBulletListItem(string input) {
 void RenderPropertiesTable(List<PropertyInfo> input) {
 	
 
-	WriteLine("| Access | Signature | Description |");
-	WriteLine("| --- | --- | --- | --- | --- |");
+	WriteLine("Access | Signature | Description");
+	WriteLine("--- | --- | ---");
 	foreach (var propertyInfo in input.OrderBy(x => x.Name)) {
-		WriteLine(string.Format("| {0} | {1} {2} | {3} | ",propertyInfo.Access, propertyInfo.Type,propertyInfo.Name, string.Format("{0}{1}{2}",propertyInfo.Summary, propertyInfo.Remarks, propertyInfo.Example)));
+		WriteLine(string.Format("{0} | {1} {2} | {3}",propertyInfo.Access, propertyInfo.Type,propertyInfo.Name, string.Format("{0}{1}{2}",propertyInfo.Summary, propertyInfo.Remarks, propertyInfo.Example)));
 	}
 	WriteLine("");
 
@@ -67,8 +67,8 @@ void RenderPropertiesTable(List<PropertyInfo> input) {
 void RenderMethodsTable(List<MethodInfo> input) {
 
 	RenderHeaderFour("Methods");
-	WriteLine("| Access | Signature | Description |");
-	WriteLine("| --- | --- | --- | --- |");
+	WriteLine("Access | Signature | Description");
+	WriteLine("--- | --- | ---");
 	foreach (var methodInfo in input.OrderBy(x => x.Name)) {
 		StringBuilder sbParameters = new StringBuilder();
 		for(int i = 0; i < methodInfo.ParameterInfos.Count(); i++){
@@ -79,7 +79,7 @@ void RenderMethodsTable(List<MethodInfo> input) {
 		}
 		var signature = string.Format("{2} {0}({1})",methodInfo.Name,sbParameters.ToString() ,methodInfo.ReturnType);
 		var description = string.Format("{0}{1}{2}",methodInfo.Summary, methodInfo.Remarks, methodInfo.Example);
-		WriteLine(string.Format("| {0} | {1} | {2} |",methodInfo.Access, signature, description));
+		WriteLine(string.Format("{0} | {1} | {2}",methodInfo.Access, signature, description));
 	}
 	WriteLine("");
 

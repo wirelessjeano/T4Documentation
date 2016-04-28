@@ -42,7 +42,7 @@ string folder = folderItem.Key; string folderDescription = folderItem.Value;#>
 <# if(!string.IsNullOrEmpty(folderDescription)) { #>
 <# RenderParagraph(folderDescription); #>
 <#}#>
-<# RenderAnchor(settings.WikiLinkPrefix + folder, "See full" + folder.ToLower() + "reference."); #>
+<# RenderAnchor(settings.WikiLinkPrefix + folder, "See full " + folder.ToLower() + " reference."); #>
 <#}#>
 <#}#>
 <#
@@ -77,6 +77,14 @@ string folder = folderItem.Key; string folderDescription = folderItem.Value; #>
 <# WriteLine(""); #>
 <#}#>
 <#}#>
+<# if(!string.IsNullOrEmpty(infoItem.Example)) { #>
+<# RenderHeaderFour("Example"); #>
+<# RenderParagraph(infoItem.Example); #>
+<#}#>
+<# if(!string.IsNullOrEmpty(infoItem.ExampleCode)) { #>
+<# RenderHeaderFour("Example Code"); #>
+<# RenderCode(infoItem.ExampleCode); #>
+<#}#>
 <#
 /*
 Properties start
@@ -106,14 +114,6 @@ Methods end
 <# if(!string.IsNullOrEmpty(infoItem.Remarks)) { #>
 <# RenderHeaderFour("Remarks"); #>
 <# RenderParagraph(infoItem.Remarks); #>
-<#}#>
-<# if(!string.IsNullOrEmpty(infoItem.Example)) { #>
-<# RenderHeaderFour("Example"); #>
-<# RenderParagraph(infoItem.Example); #>
-<#}#>
-<# if(!string.IsNullOrEmpty(infoItem.ExampleCode)) { #>
-<# RenderHeaderFour("Example Code"); #>
-<# RenderCode(infoItem.ExampleCode); #>
 <#}#>
 <#}#>
 <#}#>

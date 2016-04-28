@@ -41,18 +41,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Tests\TestClass.cs" />
+    <Compile Include="Tests\Person.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="T4Documentation.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       <LastGenOutput>T4Documentation.txt</LastGenOutput>
-    </Content>
-    <Content Include="T4Documentation.txt">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>T4Documentation.tt</DependentUpon>
     </Content>
     <Content Include="T4Documentation.tt.MarkDown.provider.t4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -61,6 +56,7 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <None Include="install.ps1" />
+    <None Include="README.MD" />
     <None Include="T4Documentation.Generator.nuspec" />
     <Content Include="T4Documentation.tt.settings.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

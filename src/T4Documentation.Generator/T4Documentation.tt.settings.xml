@@ -1,9 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <DocumentSettings>
+  <!--If SplitIntoMultipleFiles == true then this is prefixed to 'homepage'-->
   <WikiLinkPrefix></WikiLinkPrefix>
   <RootFoldersToDocument>
-    <!--<Folder name="Tests" description="This is a test class." />-->
+    <!--Uncomment the below line to pick specific root folders to document-->
+    <!--<Folder name="Areas" description="This is the areas folder." />-->
+    <!--<Folder name="Tests" description="This is a test folder." />-->
   </RootFoldersToDocument>
+  <!--If SplitIntoMultipleFiles == true then creates a page per root folder-->
   <SplitIntoMultipleFiles>False</SplitIntoMultipleFiles>
+  <!--If IncludeUsingStatements == true then displays using statements per structure (useful for search)-->
   <IncludeUsingStatements>True</IncludeUsingStatements>
 </DocumentSettings>
